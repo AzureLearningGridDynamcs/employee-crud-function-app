@@ -50,4 +50,4 @@ jobs:
           az functionapp config appsettings set \
             --name ${{ secrets.AZURE_FUNCTIONAPP_EMPLOYEE_CRUD_DEV }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
-            --settings COSMOS_DB_ENDPOINT="${{ secrets.COSMOS_DB_ENDPOINT_DEV }}" COSMOS_DB_KEY="${{ secrets.COSMOS_DB_KEY_DEV}}"
+            --settings COSMOS_DB_ENDPOINT="${{ secrets.COSMOS_DB_ENDPOINT_DEV }}" COSMOS_DB_KEY="${{ secrets.COSMOS_DB_KEY_DEV}}" COSMOS_DB_DATABASE_ID="${{ secrets.COSMOS_DB_DATABASE_ID_DEV }}" CONTAINER_ID="${{ secrets.CONTAINER_ID_DEV }}"
