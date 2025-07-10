@@ -4,17 +4,20 @@ import { BlobServiceClient } from "@azure/storage-blob";
 
 import 'dotenv/config'
 
-export async function
-    GetEmployees(request: HttpRequest, context: InvocationContext):
-    Promise<HttpResponseInit> {
+const LOG_PREFIX = '[GetEmployees] -> ';
 
-    context.log(`Http function processed request for url "${request.url}"`);
+export async function GetEmployees(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
     const cosmosEndpoint = process.env.COSMOS_DB_ENDPOINT;
     const cosmosKey = process.env.COSMOS_DB_KEY;
     const databaseId = process.env.COSMOS_DB_DATABASE_ID;
     const containerId = process.env.CONTAINER_ID;
 
+    if (!cosmosEndpoint || !cosmosKey || !databaseId || !containerId) {
+        context.error(LOG_PREFIX + 'Missing environment variables for Cosmos DB connection');
+        context.error(LOG_PREFIX + `cosmosEndpoint: ${cosmosEndpoint}, cosmosKey: ${cosmosKey}, databaseId: ${databaseId}, containerId: ${containerId}`);
+        return { status: 500, body: 'Error obtaining credentials During Execution Time' };
+    }
 
     try {
         const client = new CosmosClient({ endpoint: cosmosEndpoint!, key: cosmosKey! });
@@ -29,8 +32,8 @@ export async function
         };
         
     } catch (error) {
-        context.error('Error creating CosmosClient:', error);
-        return { status: 500, body: 'Internal Server Error' };
+        context.error(LOG_PREFIX + 'Error creating CosmosClient:', error);
+        return { status: 500, body: 'Error Conencting to DB ' + `: ${error.message}` };
     }
 };
 
