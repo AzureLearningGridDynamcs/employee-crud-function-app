@@ -23,11 +23,18 @@ export async function GetEmployees(request: HttpRequest, context: InvocationCont
         const client = new CosmosClient({ endpoint: cosmosEndpoint!, key: cosmosKey! });
         const container = client.database(databaseId).container(containerId);
 
-        const { resources: employees } = await container.items.query("SELECT * FROM c").fetchAll();
+        const employees = await container.items.query("SELECT * FROM c").fetchAll();
+
+        // map employees array to only Display id, name and Company id
+        const employeesRepsonse = employees.resources.map(employee => ({
+            id: employee.id,
+            name: employee.name,
+            companyId: employee.companyId
+        }));
 
         return {
             status: 200,
-            body: JSON.stringify(employees),
+            body: JSON.stringify(employeesRepsonse),
             headers: { "Content-Type": "application/json" }
         };
         
