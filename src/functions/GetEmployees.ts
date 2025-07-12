@@ -29,6 +29,7 @@ export async function GetEmployees(request: HttpRequest, context: InvocationCont
         const employeesRepsonse = employees.resources.map(employee => ({
             id: employee.id,
             name: employee.name,
+            position: employee.position,
             companyId: employee.companyId
         }));
 
