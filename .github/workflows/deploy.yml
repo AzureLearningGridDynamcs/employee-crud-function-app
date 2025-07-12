@@ -1,0 +1,53 @@
+name: Deploy Azure Function (TypeScript + Cosmos)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Debug secrets (remove after testing)
+        run: |
+          echo "CLIENT_ID: `${{ secrets.AZURE_CLIENT_ID_DEV }}` "
+          echo "TENANT_ID: `${{ secrets.AZURE_TENANT_ID_DEV }}` "
+          echo "SUBSCRIPTION_ID: `${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}` "
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_DEV }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+
+      - name: Deploy Function App
+        uses: azure/functions-action@v1.5.1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTIONAPP_EMPLOYEE_CRUD_DEV }}
+          package: '.'
+
+      - name: Set App Settings (Cosmos DB)
+        run: |
+          az functionapp config appsettings set \
+            --name ${{ secrets.AZURE_FUNCTIONAPP_EMPLOYEE_CRUD_DEV }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
+            --settings COSMOS_DB_ENDPOINT="${{ secrets.COSMOS_DB_ENDPOINT_DEV }}" COSMOS_DB_KEY="${{ secrets.COSMOS_DB_KEY_DEV }}" COSMOS_DB_DATABASE_ID="${{ secrets.COSMOS_DB_DATABASE_ID_DEV }}" CONTAINER_ID="${{ secrets.COSMOS_CONTAINER_ID_DEV }}"
